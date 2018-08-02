@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0,viewport-fit=cover">
+
+		<title></title>
+		<style>
+			body,
+			html {
+				width: 100%;
+				height: 100%;
+			}
+			
+			* {
+				margin: 0;
+			}
+			
+			#container {
+				border: 0;
+				cursor: pointer;
+				width: 100%;
+				height: 100%;
+				background: #ffffff;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="container"></div>
+	</body>
+	<script src="js/jquery-1.6.4.js"></script>
+	<script src="js/test/three2.js"></script>
+	<script src="js/OrbitControls.js"></script>
+	<script src="js/OBJLoader.js"></script>
+	<script src="js/MTLLoader.js"></script>
+	<script src="js/Mirror.js"></script>
+	<script src="js/FBXLoader.js"></script>
+
+	<script>
+		var renderer;
+		var camera;
+		var orbitControl;
+		var scene;
+		var light;
+		var backgroundPlant = null,
+			planeG, ma;
+		var clock = new THREE.Clock();
+
+		function initThree() {
+			console.log("初始化three.js")
+			width = document.getElementById("container").clientWidth;
+			height = document.getElementById("container").clientHeight;
+			renderer = new THREE.WebGLRenderer({
+				antialias: true
+			});
+
+			// renderer.shadowMapEnabled = true;
+			renderer.setSize(width, height);
+			document.getElementById('container').appendChild(renderer.domElement);
+			renderer.setClearColor(0xFFFFFF, 1.0);
+		}
+
+		function initCamera() {
+			console.log("初始化摄像机");
+			camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 800);
+			camera.position.set(400, 200, 0);
+
+			// controls
+
+			controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+			//controls.addEventListener( 'change', render ); // call this only in static scenes (i.e., if there is no animation loop)
+
+			controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+			controls.dampingFactor = 0.25;
+
+			controls.screenSpacePanning = false;
+
+			controls.minDistance = 100;
+			controls.maxDistance = 500
+
+			controls.maxPolarAngle = Math.PI / 2;
+		}
+
+		function initScene() {
+			scene = new THREE.Scene();
+		}
+
+		function initLight() {
+			light = new THREE.PointLight(0xFFFFFF);
+			light.position.set(500, 500, 500);
+			light.castShadow = true;
+			scene.add(light);
+
+			var spotLight = new THREE.DirectionalLight(0xffffff);
+			spotLight.position.set(500, 500, 500);
+			spotLight.castShadow = true;
+			scene.add(spotLight);
+
+			var spotLight = new THREE.DirectionalLight(0xffffff);
+			spotLight.position.set(-500, -500, 500);
+			spotLight.castShadow = true;
+			scene.add(spotLight);
+		}
+
+		function render() {
+			var delta = clock.getDelta();
+			renderer.render(scene, camera);
+			//addGround()
+			requestAnimationFrame(render);
+		}
+
+		function preload() {
+			initThree();
+			initCamera();
+			initScene();
+			initLight();
+			addCar();
+
+			setTimeout(function() {
+				addGround();
+			}, 5000)
+
+		}
+
+		function addCar() {
+			var onProgress = function(xhr) {
+				if(xhr.lengthComputable) {
+					var percentComplete = xhr.loaded / xhr.total * 100;
+				}
+			};
+
+			var onError = function(xhr) {};
+			var mtlLoader = new THREE.MTLLoader();
+			mtlLoader.setBaseUrl('assets/obj/');
+			mtlLoader.setPath('assets/obj/');
+			mtlLoader.load('car-pink3.mtl', function(materials) {
+				console.log(materials)
+				materials.preload();
+
+				var objLoader = new THREE.OBJLoader();
+				objLoader.setMaterials(materials);
+				//				objLoader.setMaterials(materials);
+				objLoader.setPath('assets/obj/');
+				objLoader.load('car-pink3.obj', function(object) {
+					scene.add(object);
+					object.position.x = 0;
+					object.position.z = 0;
+					object.scale.set(0.5, 0.5, 0.5);
+				}, onProgress, onError);
+
+			});
+		}
+
+		function addGround() {
+
+			var planeG = new THREE.PlaneGeometry(5000, 5000);
+			var ma = new THREE.MeshLambertMaterial({
+				map: THREE.ImageUtils.loadTexture("assets/img/skybox/ny.jpg"),
+				envMap: scene.background,
+				combine: THREE.MixOperation,
+				reflectivity: 0.9
+			});
+
+			var backgroundPlant = new THREE.Mesh(planeG, ma);
+
+			backgroundPlant.rotation.x = -Math.PI / 2;
+			scene.add(backgroundPlant);
+
+		}
+
+		$(document).ready(function() {
+			preload();
+			render();
+			renderer.render(scene, camera);
+			scene.background = new THREE.CubeTextureLoader()
+				.setPath("assets/img/233/")
+				.load(['px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg', ])
+			renderer.render(scene, camera);
+		})
+	</script>
+
+</html>
