@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0,viewport-fit=cover">
+
+		<title></title>
+		<style>
+			body,
+			html {
+				width: 100%;
+				height: 100%;
+			}
+			
+			* {
+				margin: 0;
+			}
+			
+			#container {
+				border: 0;
+				cursor: pointer;
+				width: 100%;
+				height: 100%;
+				background: #ffffff;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="container"></div>
+	</body>
+	<script src="js/jquery-1.6.4.js"></script>
+	<script src="js/test/three.js"></script>
+	<script src="js/OrbitControls.js"></script>
+	<script src="js/OBJLoader.js"></script>
+	<script src="js/MTLLoader.js"></script>
+	<script src="js/Mirror.js"></script>
+	<script src="js/FBXLoader.js"></script>
+
+	<script>
+		var renderer;
+		var camera;
+		var orbitControl;
+		var scene;
+		var light;
+		var backgroundPlant = null,
+			planeG, ma;
+		var moving = false;
+		var clock = new THREE.Clock();
+		var cameraPosition = {
+			x: 0,
+			y: 20,
+			z: -50
+		};
+		var objectsArr = [];
+		var objectsHint = [];
+
+		function initThree() {
+			
+			width = document.getElementById("container").clientWidth;
+			height = document.getElementById("container").clientHeight;
+			renderer = new THREE.WebGLRenderer({
+				antialias: true
+			});
+
+			renderer.shadowMapEnabled = true;
+			renderer.setSize(width, height);
+			document.getElementById('container').appendChild(renderer.domElement);
+			renderer.setClearColor(0xFFFFFF, 1.0);
+		}
+
+		function initCamera() {
+			camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
+			camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
+			camera.lookAt({
+				x: 0,
+				y: 0,
+				z: 0
+			});
+
+			// controls
+
+			controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+			//controls.addEventListener('change', render); // call this only in static scenes (i.e., if there is no animation loop)
+
+			controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+			controls.dampingFactor = 0.25;
+
+			controls.screenSpacePanning = false;
+
+			controls.minDistance = 50;
+			controls.maxDistance = 100
+
+			controls.minPolarAngle = Math.PI / 6;
+			controls.maxPolarAngle = Math.PI / 2.5;
+			// 自动旋转
+			controls.autoRotate = true;
+			controls.autoRotateSpeed = 0.5
+
+			//controls.maxPolarAngle = Math.PI;
+
+			clock = new THREE.Clock();
+		}
+
+		function initScene() {
+			scene = new THREE.Scene();
+		}
+
+		var sun1;
+
+		function initLight() {
+			//			var light = new THREE.PointLight(0xFFFFFF);
+			//			light.position.set(1000, 500, 1000);
+			//			light.castShadow = true;
+			//			scene.add(light);
+			//			
+			//			var light2 = new THREE.PointLight(0xFFFFFF);
+			//			light2.position.set(-1000, 500, -1000);
+			//			light2.castShadow = true;
+			//			scene.add(light2);
+
+			sun1 = new THREE.DirectionalLight(0xffffff);
+			sun1.position.set(-1000, 500, -1000);
+			sun1.castShadow = true;
+			scene.add(sun1);
+
+			sun2 = new THREE.DirectionalLight(0xffffff);
+			sun2.position.set(1000, 500, 1000);
+			sun2.castShadow = true;
+			scene.add(sun2);
+
+		}
+
+		var maxTime = 60;
+		var maxIndex = 60;
+
+		function render() {
+			if(!moving) {
+				if(maxIndex > 0) {
+					maxIndex--;
+					controls.autoRotate = false;
+				} else {
+					controls.autoRotate = true;
+				}
+			} else {
+				maxIndex = maxTime;
+				controls.autoRotate = false;
+			}
+			var delta = clock.getDelta();
+			controls.update(delta); //更新时间
+
+			//			hint1.rotation.y = camera.rotation.y;
+			//			hint1.rotation.x = camera.rotation.x;
+			//			hint1.rotation.z = camera.rotation.z;
+
+			sun1.rotation.y = camera.rotation.y;
+			sun1.rotation.x = camera.rotation.x;
+			sun1.rotation.z = camera.rotation.z;
+
+			renderer.render(scene, camera);
+			requestAnimationFrame(render);
+		}
+
+		var carModel;
+
+		function addCar() {
+			// 车子的素材设置在 object.children[0].material 上
+						var onProgress = function(xhr) {
+							if(xhr.lengthComputable) {
+								var percentComplete = xhr.loaded / xhr.total * 100;
+							}
+						};
+			
+						var onError = function(xhr) {};
+						var mtlLoader = new THREE.MTLLoader();
+						var objLoader = new THREE.OBJLoader();
+						mtlLoader.setBaseUrl('assets/obj/');
+						mtlLoader.setPath('assets/obj/');
+						mtlLoader.load('car1.mtl', function(materials) {						
+							materials.preload();		
+							objLoader.setMaterials(materials);
+							console.log(objLoader.materials.materials)
+							objLoader.setPath('assets/obj/');
+							objLoader.load('car1.obj', function(object) {
+								console.log(object.children[0])
+					
+								object.position.x = 0;
+								object.position.z = 0;
+								object.position.y = 1;
+								object.scale.set(0.21, 0.21, 0.21);
+								carModel = object;
+								scene.add(carModel);
+							}, onProgress, onError);
+			
+						});
+			var carMtl;
+			var mtlLoader = new THREE.MTLLoader();
+			mtlLoader.setBaseUrl('assets/obj/');
+			mtlLoader.setPath('assets/obj/');
+			mtlLoader.load('car1.mtl', function(materials) {
+				materials.preload();
+				
+				objLoader.setMaterials(materials);
+				
+				carMtl=objLoader.materials.materials;
+				console.log(carMtl)
+			})
+			var objLoader = new THREE.OBJLoader();
+			objLoader.setPath('assets/obj/');
+			objLoader.load('car1.obj', function(group) {
+				console.log(group)
+				var geometry = group.children[0].geometry;
+				geometry.attributes.uv2 = geometry.attributes.uv;
+				geometry.center();
+
+				var materialNormal = new THREE.MeshLambertMaterial({
+					color: 0xffffff
+				});
+
+				var materialNormal2 = new THREE.MeshLambertMaterial({
+					color: 0xff0000
+				});
+				
+				addMesh(geometry,carMtl);
+				
+
+//				setTimeout(function() {
+//					mesh.material = materialNormal2
+//				}, 15000)
+
+				
+
+			});
+
+		}
+		
+		function addMesh(geometry,material){
+			if(!material){
+				setTimeout(function(){
+					addMesh(material);
+					return;
+				},500)
+			}else{
+				var arr=[];
+				for( item in material){
+					arr.push(material[item]);
+				}
+				console.log(geometry)
+				console.log(arr)
+				mesh = new THREE.Mesh(geometry, arr);
+				mesh.scale.multiplyScalar(0.21);
+				scene.add(mesh);
+			}
+			
+		}
+
+		function addGround() {
+
+			var planeG = new THREE.PlaneGeometry(30, 50);
+			var ma = new THREE.MeshLambertMaterial({
+				map: THREE.ImageUtils.loadTexture("assets/img/shadow.png"),
+				transparent: true,
+
+			});
+
+			var backgroundPlant = new THREE.Mesh(planeG, ma);
+			backgroundPlant.position.y = 1;
+			backgroundPlant.rotation.x = -Math.PI / 2;
+			scene.add(backgroundPlant);
+
+			let shape = new THREE.Shape();
+			shape.absarc(0, 0, 300, 0 / 180 * Math.PI, 360 / 180 * Math.PI, false);
+			shape.lineTo(0, 0); //（1）做一条线到圆心
+			let arcGeometry = new THREE.ShapeGeometry(shape);
+			//（2）使用网格模型来表示
+			arcMaterial = new THREE.MeshLambertMaterial({
+				map: THREE.ImageUtils.loadTexture("assets/img/skybox/ny.jpg"),
+				envMap: scene.background,
+				combine: THREE.MixOperation,
+				reflectivity: 0.05
+			});
+			arc = new THREE.Mesh(arcGeometry, arcMaterial);
+			arc.rotation.x = -Math.PI / 2;
+			scene.add(arc)
+			setTimeout(function() {
+
+			}, 10000)
+
+		}
+
+		function create_hint_element(name, size, src, positionObj, isHint) {
+			isHint = isHint || false;
+			var planeG = new THREE.PlaneGeometry(size.width, size.height);
+			var ma = new THREE.MeshBasicMaterial({
+				map: THREE.ImageUtils.loadTexture(src),
+				transparent: true,
+				side: THREE.DoubleSide
+
+			});
+
+			var icon = new THREE.Mesh(planeG, ma);
+			//			hint.rotation.y=Math.PI/2;
+			icon.position.x = positionObj.x;
+			icon.position.y = positionObj.y;
+			icon.position.z = positionObj.z;
+			icon.name = name;
+			icon.imgUrl = src;
+
+			objectsArr.push(icon);
+
+			if(isHint) {
+				objectsHint.push(icon);
+				icon.visible = false;
+			} else {
+				scene.add(icon);
+				icon.visible = true;
+			}
+		}
+
+		var hint;
+
+		function addclickboard() {
+
+			create_hint_element("hint1", {
+				width: 10,
+				height: 10
+			}, "assets/img/timg.jpg", {
+				x: 0,
+				y: 20,
+				z: 0
+			}, true);
+
+			create_hint_element("hint2", {
+				width: 10,
+				height: 10
+			}, "assets/img/timg2.jpg", {
+				x: 10,
+				y: 20,
+				z: 0
+			}, true);
+
+			create_hint_element("icon1", {
+				width: 2,
+				height: 2
+			}, "assets/img/icon.png", {
+				x: 3,
+				y: 10,
+				z: 20
+			});
+
+			create_hint_element("icon2", {
+				width: 2,
+				height: 2
+			}, "assets/img/icon.png", {
+				x: -3,
+				y: 10,
+				z: 20
+			});
+
+		}
+
+		//点击射线
+		var raycaster = new THREE.Raycaster();
+		var mouse = new THREE.Vector2();
+
+		function onDocumentMouseDown(event) {
+			event.preventDefault();
+			mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+			mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+
+			raycaster.setFromCamera(mouse, camera);
+
+			//这个居然成功了
+			//总结一下，这里必须装网格，mesh，装入组是没有效果的
+			//第一个其实并没有成功，点击盒子的时候，事实上是穿过了盒子点到了地板上，理由就是——点击其他的mesh也会触发效果
+			//所以我们将所有的盒子的网格放入对象就可以了~~~~~萨斯噶瓦大喜
+			//var intersects = raycaster.intersectObjects(scene.children);
+
+			var intersects = raycaster.intersectObjects(objectsArr);
+
+			//console.log(intersects)
+			if(intersects.length > 0) {
+				for(var i = 0; i < intersects.length; i++) {
+					if(intersects[i].object.visible == true) {
+						var objectName = intersects[i].object.name;
+						switch(objectName) {
+							case "hint1":
+								getElementFormArr("hint1").visible = false;
+								scene.remove(getElementFormArr("hint1"));
+								break;
+							case "hint2":
+								getElementFormArr("hint2").visible = false;
+								scene.remove(getElementFormArr("hint2"));
+								break;
+							case "icon1":
+								getElementFormArr("hint1").visible = true;
+								scene.add(getElementFormArr("hint1"));
+								break;
+							case "icon2":
+								getElementFormArr("hint2").visible = true;
+								scene.add(getElementFormArr("hint2"));
+								break;
+						}
+
+					}
+				}
+
+			}
+
+		}
+
+		function getElementFormArr(name) {
+			var obj;
+			objectsHint.map(function(item) {
+				if(item.name == name) {
+					obj = item;
+				}
+			});
+			return obj;
+		}
+
+		function addBall() {
+			var geometry = new THREE.SphereBufferGeometry(20, 20, 20);
+			//将纹理的环境纹理设置为scene的背景纹理
+			sphereMaterial = new THREE.MeshLambertMaterial({
+				color: 0xffffff
+			});
+			sphereMesh = new THREE.Mesh(geometry, sphereMaterial);
+			sphereMesh.position.set(50, 10, 50);
+			scene.add(sphereMesh);
+
+			var material = new THREE.MeshLambertMaterial({
+				color: 0xff0000
+			});
+
+			setTimeout(function() {
+				sphereMesh.material = material;
+			}, 15000);
+		}
+
+		function preload() {
+			initThree();
+			initCamera();
+			initScene();
+			initLight();
+			addCar();
+			addclickboard();
+			addBall();
+
+			setTimeout(function() {
+				addGround();
+			}, 5000)
+
+		}
+
+		$(document).ready(function() {
+			preload();
+			render();
+			renderer.render(scene, camera);
+			scene.background = new THREE.CubeTextureLoader()
+				.setPath("assets/img/skybox/")
+				.load(['px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg', ])
+			renderer.render(scene, camera);
+
+			document.addEventListener('mousedown', onDocumentMouseDown, false);
+		})
+	</script>
+
+</html>

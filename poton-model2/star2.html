@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+	</head>
+
+	<body>
+	</body>
+
+</html>
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0,viewport-fit=cover">
+
+	<title></title>
+	<style>
+		body,
+		html {
+			width: 100%;
+			height: 100%;
+		}
+		
+		* {
+			margin: 0;
+		}
+		
+		#container {
+			border: 0;
+			cursor: pointer;
+			width: 100%;
+			height: 100%;
+			background: #ffffff;
+		}
+		
+		.car-btn-panel {
+			width: 40%;
+			display: flex;
+			position: absolute;
+			bottom: 10%;
+			left: 30%;
+			justify-content: center;
+		}
+		
+		.car-btn {
+			width: 15vw;
+			height: 2vw;
+			color: #FFFFFF;
+			text-align: center;
+			padding: 1vw;
+		}
+		
+		.light-btn {
+			width: 5vw;
+			position: absolute;
+			bottom: 9vh;
+			right: 7vw;
+		}
+		
+		.light-btn2 {
+			width: 5vw;
+			position: absolute;
+			bottom: 9vh;
+			left: 7vw;
+		}
+		
+		.car-btn div {
+			width: 80%;
+			/*height: 80%;*/
+			margin: auto;
+			border-radius: 8px;
+		}
+		
+		.car-btn__btn1 {
+			/*background: #d13b8b;*/
+		}
+		
+		.car-btn__btn2 {
+			/*background: #403bc3;*/
+		}
+		
+		.car-btn__btn3 {
+			/*background: #800e91;*/
+		}
+		
+		.home-btn {
+			width: 5vw;
+			position: absolute;
+			top: 9vh;
+			left: 7vw;
+			display: none;
+			cursor: pointer;
+		}
+		
+		.shadow {
+			width: 100%;
+			height: 100%;
+			background: black;
+			position: absolute;
+			top: 0;
+			left: 0;
+			display: none;
+		}
+		
+
+		
+		.btn-pic{
+			width: 100%;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="container"></div>
+	<div class="car-btn-panel">
+		<div class="car-btn">
+			<div class="car-btn__btn1">
+				<img src="js/test/img/btn1.png" class="btn-pic" />
+			</div>
+		</div>
+		<div class="car-btn">
+			<div class="car-btn__btn2">
+				<img src="js/test/img/btn3.png" class="btn-pic" />
+			</div>
+		</div>
+		<div class="car-btn">
+			<div class="car-btn__btn3">
+				<img src="js/test/img/btn2.png" class="btn-pic" />
+			</div>
+		</div>
+	</div>
+
+	<div class="shadow"></div>
+</body>
+<script src="js/jquery-1.6.4.js"></script>
+<script src="js/three-indomo.js"></script>
+
+<!--<script src="js/test/CanvasRenderer.js"></script>-->
+<script src="js/OrbitControls.js"></script>
+<script src="js/OBJLoader.js"></script>
+<script src="js/MTLLoader.js"></script>
+<script src="js/FBXLoader.js"></script>
+<script src="js/inflate.min.js"></script>
+<!--<script src="js/image-load.js"></script>-->
+<script src="js/main-star2.js"></script>
+<script src="js/test/tween.min.js"></script>
+<script src="js/loading-tool.js"></script>
+
+<script>
+	var loading = new loadingTool();
+	loading.loading();
+</script>
+
+</html>
